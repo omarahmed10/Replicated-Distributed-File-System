@@ -19,8 +19,8 @@ public class Reader {
 	 * 
 	 * @param args
 	 *            0 is the host name of the master server <String> <br>
-	 *            1 is the port number of the master server <integer> 2 is the File
-	 *            name to be read.
+	 *            1 is the port number of the master server <integer><br>
+	 *            2 is the File name to be read.
 	 * @throws NumberFormatException
 	 * @throws NotBoundException
 	 * @throws IOException

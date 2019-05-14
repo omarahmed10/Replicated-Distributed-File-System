@@ -1,86 +1,88 @@
 package master;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.Queue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import fileSytem.WriteMsg;
 import replica.ReplicaLoc;
-import replica.ReplicaServer;
 
-public class MasterServer extends UnicastRemoteObject implements MasterServerClientInterface {
+public class MasterServer extends MasterServerClientImpl {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static final String PROPERTIES_FILENAME = System.getProperty("user.dir") + "/master/system.properties";
+	private static Map<String, Object> prop;
 
-	private Map<String, ReplicaServer[]> filesMap;
-
-	private long transactionId = 0;
-	private long timeStamp = 0;
-	private int replicasNum;
-	private Random rnd;
-	private ReplicaServer[] allReplicaServers;
-
-	protected MasterServer(String[] hosts, int[] ports, int replicasNum) throws RemoteException {
-		super();
-
-		assert replicasNum <= hosts.length;
-
-		allReplicaServers = new ReplicaServer[hosts.length];
-		for (int i = 0; i < hosts.length; i++) {
-			allReplicaServers[i] = new ReplicaServer(new ReplicaLoc(hosts[i], ports[i]));
-		}
-		this.replicasNum = replicasNum;
-		rnd = new Random(0);
-		filesMap = new HashMap<>();
+	protected MasterServer(ReplicaLoc[] replicaServers, int replicasNum) throws RemoteException {
+		super(replicaServers, replicasNum);
 	}
 
-	@Override
-	public ReplicaLoc read(String fileName) throws FileNotFoundException, IOException, RemoteException {
-		if (!filesMap.containsKey(fileName)) {
-			throw new FileNotFoundException();
-		}
-		return filesMap.get(fileName)[0].getReplicaLoc();
-	}
+	private static Map<String, Object> readPropertiesFile() {
+		System.out.println(PROPERTIES_FILENAME);
+		Queue<String> input;
+		Map<String, Object> prop = new HashMap<String, Object>();
+		// read file into stream, try-with-resources
+		try (Stream<String> stream = Files.lines(Paths.get(PROPERTIES_FILENAME))) {
+			input = stream.collect(Collectors.toCollection(LinkedList::new));
+			String[] server = input.poll().split(":");
+			prop.put("server name", server[0]);
+			prop.put("serverIP", server[1]);
+			prop.put("port", server[2]);
 
-	@Override
-	public synchronized WriteMsg write(String fileName) throws RemoteException, IOException {
-
-		if (!filesMap.containsKey(fileName))
-			filesMap.put(fileName, getAvailReplica());
-
-		ReplicaLoc primaryLoc = filesMap.get(fileName)[0].getReplicaLoc();
-
-		return new WriteMsg(getTransactionID(), getTimeStamp(), primaryLoc);
-	}
-
-	private ReplicaServer[] getAvailReplica() {
-		ReplicaServer[] availReplicas = new ReplicaServer[replicasNum];
-		Set<Integer> visitedRnd = new HashSet<>();
-		for (int i = 0; i < replicasNum; i++) {
-			int randIdx = rnd.nextInt(allReplicaServers.length);
-			while (visitedRnd.contains(randIdx)) {
-				randIdx = rnd.nextInt(allReplicaServers.length);
+			int numberOfReplicas = Integer.parseInt(input.poll());
+			prop.put("numberOfReplicas", numberOfReplicas);
+			for (int i = 1; i < numberOfReplicas + 1; i++) {
+				prop.put("R" + i, input.poll());
 			}
-			availReplicas[i] = allReplicaServers[randIdx];
-			visitedRnd.add(randIdx);
+			prop.put("numberOfFileReplicas", Integer.parseInt(input.poll()));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return availReplicas;
+
+		return prop;
 	}
 
-	private long getTransactionID() {
-		return ++transactionId;
+	private static ReplicaLoc[] startReplicaServers() throws IOException {
+		String path = System.getProperty("user.dir");
+		int numberOfReplicas = (int) prop.get("numberOfReplicas");
+		ReplicaLoc[] allReplicas = new ReplicaLoc[numberOfReplicas];
+
+		for (int i = 1; i < numberOfReplicas + 1; i++) {
+			String[] server = prop.get("R" + i).toString().split(":");
+
+			int port = Integer.parseInt(server[2]);
+			SSh ssh = new SSh(server[0], server[1]);
+			ssh.runCommand(" cd " + path + "/bin/replica; java ReplicaServer " + i + " " + server[1] + " " + server[2]);
+
+			allReplicas[i - 1] = new ReplicaLoc(server[1], port);
+		}
+		return allReplicas;
 	}
 
-	private long getTimeStamp() {
-		return ++timeStamp;
-	}
+	/**
+	 * 
+	 * @param args
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws IOException {
+		readPropertiesFile();
+		ReplicaLoc[] allReplicas = startReplicaServers();
 
+		MasterServerClientImpl masterAPI = new MasterServer(allReplicas, (int) prop.get("numberOfFileReplicas"));
+
+		Registry registry = LocateRegistry.getRegistry(prop.get("serverIP").toString(),
+				Integer.parseInt(prop.get("port").toString()));
+		registry.rebind("masterAPI", masterAPI);
+	}
 }

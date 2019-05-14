@@ -28,7 +28,7 @@ public class Writer {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws NumberFormatException, NotBoundException, IOException {
-		if (args.length < 3) {
+		if (args.length < 4) {
 			System.out.println("start command has to be <host name> <port number> <file name> <content>");
 			System.exit(-1);
 		}

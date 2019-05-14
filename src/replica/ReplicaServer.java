@@ -1,59 +1,30 @@
 package replica;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.Set;
+import java.rmi.NotBoundException;
 
-import fileSytem.FileContent;
-import fileSytem.MessageNotFoundException;
-import fileSytem.WriteMsg;
+public class ReplicaServer extends ReplicaServerImpl{
 
-public class ReplicaServer implements ReplicaServerClientInterface {
-	private ReplicaLoc replicaLoc;
-	private Set<String> files;
-	
 	public ReplicaServer(ReplicaLoc replicaLoc) {
-		// we should start the server here
-		this.replicaLoc = replicaLoc;
-	}
-	
-	@Override
-	public WriteMsg write(long txnID, long msgSeqNum, FileContent data) throws RemoteException, IOException {
-		// TODO Auto-generated method stub
-		return null;
+		super(replicaLoc);
+		// TODO Auto-generated constructor stub
 	}
 
-	@Override
-	public FileContent read(String fileName) throws FileNotFoundException, IOException, RemoteException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	/**
+	 * 
+	 * @param args
+	 *            : 0 is the Replica ID <br>
+	 *            : 1 is the host name <br>
+	 *            : 2 is the port number <br>
+	 * @throws NumberFormatException
+	 * @throws NotBoundException
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws NumberFormatException, NotBoundException, IOException {
+		if (args.length < 3) {
+			System.out.println("start command has to be <Replica ID> <host name> <port number>");
+			System.exit(-1);
+		}
 
-	@Override
-	public boolean commit(long txnID, long numOfMsgs) throws MessageNotFoundException, RemoteException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean abort(long txnID) throws RemoteException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	public ReplicaLoc getReplicaLoc() {
-		return replicaLoc;
-	}
-	
-	public Set<String> getFiles() {
-		return files;
-	}
-	
-	public void addFile(String fileName) {
-//		files.add();
-	}
-	
-	public void removeFile(String fileName) {
-//		files.remove();
 	}
 }
