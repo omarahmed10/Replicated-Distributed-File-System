@@ -8,12 +8,12 @@ public interface MasterServerClientInterface extends Remote {
 	 * Read file from server
 	 * 
 	 * @param fileName
-	 * @return the addresses of  of its different replicas
+	 * @return the addresses of master replica server
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws RemoteException
 	 */
-	public FileReplicaServer read(String fileName) throws FileNotFoundException,
+	public ReplicaLoc read(String fileName) throws FileNotFoundException,
 			IOException, RemoteException;
 
 	/**
@@ -24,6 +24,6 @@ public interface MasterServerClientInterface extends Remote {
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	public WriteMsg write(FileContent data) throws RemoteException, IOException;
+	public WriteMsg write(String fileName) throws RemoteException, IOException;
 
 }
