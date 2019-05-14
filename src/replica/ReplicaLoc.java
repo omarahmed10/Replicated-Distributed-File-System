@@ -1,3 +1,4 @@
+package replica;
 import java.io.Serializable;
 
 public class ReplicaLoc implements Serializable{

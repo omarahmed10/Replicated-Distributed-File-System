@@ -1,3 +1,4 @@
+package master;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -7,6 +8,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import fileSytem.WriteMsg;
+import replica.ReplicaLoc;
+import replica.ReplicaServer;
 
 public class MasterServer extends UnicastRemoteObject implements MasterServerClientInterface {
 

@@ -1,7 +1,11 @@
+package master;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+
+import fileSytem.WriteMsg;
+import replica.ReplicaLoc;
 
 public interface MasterServerClientInterface extends Remote {
 	/**

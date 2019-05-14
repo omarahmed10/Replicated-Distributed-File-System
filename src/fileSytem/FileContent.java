@@ -1,3 +1,4 @@
+package fileSytem;
 import java.io.Serializable;
 
 public class FileContent implements Serializable{
