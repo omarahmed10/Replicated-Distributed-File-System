@@ -1,4 +1,4 @@
-package master;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,15 +13,13 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import replica.ReplicaLoc;
-
 public class MasterServer extends MasterServerClientImpl {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final String PROPERTIES_FILENAME = System.getProperty("user.dir") + "/master/system.properties";
+	private static final String PROPERTIES_FILENAME = System.getProperty("user.dir") + "/system.properties";
 	private static Map<String, Object> prop;
 
 	protected MasterServer(ReplicaLoc[] replicaServers, int replicasNum) throws RemoteException {
@@ -45,6 +43,7 @@ public class MasterServer extends MasterServerClientImpl {
 			for (int i = 1; i < numberOfReplicas + 1; i++) {
 				prop.put("R" + i, input.poll());
 			}
+			
 			prop.put("numberOfFileReplicas", Integer.parseInt(input.poll()));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -62,8 +61,8 @@ public class MasterServer extends MasterServerClientImpl {
 			String[] server = prop.get("R" + i).toString().split(":");
 
 			int port = Integer.parseInt(server[2]);
-			SSh ssh = new SSh(server[0], server[1]);
-			ssh.runCommand(" cd " + path + "/bin/replica; java ReplicaServer " + i + " " + server[1] + " " + server[2]);
+//			SSh ssh = new SSh(server[0], server[1]);
+//			ssh.runCommand(" cd " + path + "/bin/replica; java ReplicaServer " + i + " " + server[1] + " " + server[2]);
 
 			allReplicas[i - 1] = new ReplicaLoc(server[1], port);
 		}
@@ -76,7 +75,7 @@ public class MasterServer extends MasterServerClientImpl {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		readPropertiesFile();
+		prop = readPropertiesFile();
 		ReplicaLoc[] allReplicas = startReplicaServers();
 
 		MasterServerClientImpl masterAPI = new MasterServer(allReplicas, (int) prop.get("numberOfFileReplicas"));

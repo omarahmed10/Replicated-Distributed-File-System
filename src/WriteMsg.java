@@ -1,7 +1,5 @@
-package fileSytem;
-import java.io.Serializable;
 
-import replica.ReplicaLoc;
+import java.io.Serializable;
 
 public class WriteMsg implements Serializable {
 	/**

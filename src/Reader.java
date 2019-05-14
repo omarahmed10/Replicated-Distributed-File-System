@@ -1,4 +1,4 @@
-package client;
+
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -7,11 +7,6 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
-import fileSytem.FileContent;
-import master.MasterServerClientInterface;
-import replica.ReplicaLoc;
-import replica.ReplicaServerClientInterface;
 
 public class Reader {
 
@@ -34,7 +29,7 @@ public class Reader {
 		int port = Integer.parseInt(args[1]);
 		String fileName = args[2];
 
-		String path = System.getProperty("user.dir") + "/Readers/" + fileName + ".txt";
+		String path = System.getProperty("user.dir") + "/Client_Readers/" + fileName + ".txt";
 		BufferedWriter fileWriter = new BufferedWriter(new FileWriter(path));
 
 		Registry masterRegistry = LocateRegistry.getRegistry(host, port);
@@ -42,7 +37,6 @@ public class Reader {
 
 		try {
 			ReplicaLoc primaryReplica = masterStub.read(fileName);
-
 			Registry ReplicaRegistry = LocateRegistry.getRegistry(primaryReplica.getHost(), primaryReplica.getPort());
 			ReplicaServerClientInterface replicaStub = (ReplicaServerClientInterface) ReplicaRegistry
 					.lookup("replicaAPI");

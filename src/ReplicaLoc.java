@@ -1,7 +1,7 @@
-package replica;
+
 import java.io.Serializable;
 
-public class ReplicaLoc implements Serializable{
+public class ReplicaLoc implements Serializable {
 	/**
 	 * 
 	 */
@@ -22,7 +22,8 @@ public class ReplicaLoc implements Serializable{
 	}
 
 	/**
-	 * @param host the host to set
+	 * @param host
+	 *            the host to set
 	 */
 	private void setHost(String host) {
 		this.host = host;
@@ -36,11 +37,15 @@ public class ReplicaLoc implements Serializable{
 	}
 
 	/**
-	 * @param port the port to set
+	 * @param port
+	 *            the port to set
 	 */
 	private void setPort(int port) {
 		this.port = port;
 	}
 
-
+	@Override
+	public String toString() {
+		return this.host + " " + this.port;
+	}
 }

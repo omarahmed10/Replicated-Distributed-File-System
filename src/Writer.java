@@ -1,4 +1,3 @@
-package client;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -7,13 +6,6 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
-import fileSytem.FileContent;
-import fileSytem.MessageNotFoundException;
-import fileSytem.WriteMsg;
-import master.MasterServerClientInterface;
-import replica.ReplicaLoc;
-import replica.ReplicaServerClientInterface;
 
 public class Writer {
 	/**
@@ -39,7 +31,7 @@ public class Writer {
 		FileContent wFile = new FileContent(fileName, content);
 		int msgSeqNum = 1;
 
-		String path = System.getProperty("user.dir") + "/Readers/" + fileName + ".txt";
+		String path = System.getProperty("user.dir") + "/Client_Writers/" + fileName + ".txt";
 		BufferedWriter fileWriter = new BufferedWriter(new FileWriter(path));
 
 		Registry masterRegistry = LocateRegistry.getRegistry(host, port);
@@ -48,17 +40,16 @@ public class Writer {
 		try {
 			WriteMsg wMsg = masterStub.write(fileName);
 			ReplicaLoc primaryReplica = wMsg.getLoc();
-
 			Registry ReplicaRegistry = LocateRegistry.getRegistry(primaryReplica.getHost(), primaryReplica.getPort());
 			ReplicaServerClientInterface replicaStub = (ReplicaServerClientInterface) ReplicaRegistry
 					.lookup("replicaAPI");
 
 			replicaStub.write(wMsg.getTransactionId(), msgSeqNum++, wFile);
 			try {
-				Boolean commitDone =  replicaStub.commit(wMsg.getTransactionId(), msgSeqNum - 1);
-				if(commitDone) {
-				}else {
-					
+				Boolean commitDone = replicaStub.commit(wMsg.getTransactionId(), msgSeqNum - 1);
+				if (commitDone) {
+				} else {
+
 				}
 			} catch (MessageNotFoundException e) {
 				e.printStackTrace();
@@ -67,5 +58,4 @@ public class Writer {
 			e.printStackTrace();
 		}
 		fileWriter.close();
-	}
-}
+	}}

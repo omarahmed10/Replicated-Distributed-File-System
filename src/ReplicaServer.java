@@ -1,13 +1,14 @@
-package replica;
+
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
-public class ReplicaServer extends ReplicaServerImpl{
+public class ReplicaServer extends ReplicaServerImpl {
 
 	public ReplicaServer(ReplicaLoc replicaLoc) {
 		super(replicaLoc);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -25,6 +26,10 @@ public class ReplicaServer extends ReplicaServerImpl{
 			System.out.println("start command has to be <Replica ID> <host name> <port number>");
 			System.exit(-1);
 		}
+		ReplicaLoc myLoc = new ReplicaLoc(args[1], Integer.parseInt(args[2]));
+		ReplicaServerClientInterface replicaAPI = new ReplicaServer(myLoc);
 
+		Registry registry = LocateRegistry.getRegistry(myLoc.getHost(),myLoc.getPort());
+		registry.rebind("replicaAPI", replicaAPI);
 	}
 }
