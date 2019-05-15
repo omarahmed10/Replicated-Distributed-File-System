@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import fileSytem.ReadMsg;
 import fileSytem.WriteMsg;
-import replica.ReplicaLoc;
 
 public interface MasterServerClientInterface extends Remote {
 	/**
 	 * Read file from server
 	 * 
 	 * @param fileName
-	 * @return the addresses of master replica server
+	 * @return the required info
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws RemoteException
 	 */
-	public ReplicaLoc read(String fileName) throws FileNotFoundException,
+	public ReadMsg read(String fileName) throws FileNotFoundException,
 			IOException, RemoteException;
 
 	/**

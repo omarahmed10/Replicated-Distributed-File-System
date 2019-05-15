@@ -10,11 +10,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import fileSytem.ReadMsg;
 import fileSytem.WriteMsg;
 import replica.ReplicaLoc;
-import replica.ReplicaServerImpl;
 
-public class MasterServerClientImpl extends UnicastRemoteObject implements MasterServerClientInterface {
+public class MasterServerClientImpl extends UnicastRemoteObject
+		implements MasterServerClientInterface, MasterPrimaryServersInterface {
 
 	/**
 	 * 
@@ -29,7 +30,8 @@ public class MasterServerClientImpl extends UnicastRemoteObject implements Maste
 	private Random rnd;
 	private ReplicaLoc[] allReplicaLocation;
 
-	protected MasterServerClientImpl(ReplicaLoc[] allReplicaLocation, int replicasNum) throws RemoteException {
+	protected MasterServerClientImpl(ReplicaLoc[] allReplicaLocation,
+			int replicasNum) throws RemoteException {
 		super();
 
 		assert replicasNum <= allReplicaLocation.length;
@@ -41,15 +43,17 @@ public class MasterServerClientImpl extends UnicastRemoteObject implements Maste
 	}
 
 	@Override
-	public ReplicaLoc read(String fileName) throws FileNotFoundException, IOException, RemoteException {
+	public ReadMsg read(String fileName)
+			throws FileNotFoundException, IOException, RemoteException {
 		if (!filesMap.containsKey(fileName)) {
 			throw new FileNotFoundException();
 		}
-		return filesMap.get(fileName)[0];
+		return new ReadMsg(getTransactionID(), filesMap.get(fileName)[0]);
 	}
 
 	@Override
-	public synchronized WriteMsg write(String fileName) throws RemoteException, IOException {
+	public synchronized WriteMsg write(String fileName)
+			throws RemoteException, IOException {
 
 		if (!filesMap.containsKey(fileName))
 			filesMap.put(fileName, getAvailReplica());
@@ -79,6 +83,12 @@ public class MasterServerClientImpl extends UnicastRemoteObject implements Maste
 
 	private long getTimeStamp() {
 		return ++timeStamp;
+	}
+
+	@Override
+	public ReplicaLoc[] getReplicaServersLocs(String fileName)
+			throws RemoteException {
+		return filesMap.get(fileName);
 	}
 
 }
