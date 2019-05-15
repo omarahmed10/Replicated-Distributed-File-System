@@ -1,6 +1,5 @@
 package fileSystem;
 
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,15 +37,13 @@ public class Transaction {
 		if (!data.getFileName().equals(fileName))
 			throw new IOException("Not same file of the transaction");
 		if (writer == null)
-			writer = new BufferedWriter(
-					new FileWriter(directory + "/" + hidden + fileName, true));
+			writer = new BufferedWriter(new FileWriter(directory + "/" + hidden + fileName, true));
 		writer.append(data.getContent());
 		return ++numOfMsgs;
 	}
 
 	public FileContent read(String fileName) throws IOException {
-		return new FileContent(fileName, new String(
-				Files.readAllBytes(Paths.get(directory + "/" + fileName))));
+		return new FileContent(fileName, new String(Files.readAllBytes(Paths.get(directory + "/" + fileName))));
 	}
 
 	public boolean commit(long numOfMsgs) throws IOException {
@@ -58,9 +55,9 @@ public class Transaction {
 
 		writer.close();
 
-		new File(directory + "/" + fileName).renameTo(new File(
-				directory + "/" + fileName.substring(hidden.length())));
-
+		if (!hidden.isEmpty())
+			new java.io.File(directory + "/" + hidden + fileName)
+					.renameTo(new java.io.File(directory + "/" + fileName));
 		return true;
 	}
 

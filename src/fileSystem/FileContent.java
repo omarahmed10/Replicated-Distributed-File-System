@@ -2,7 +2,7 @@ package fileSystem;
 
 import java.io.Serializable;
 
-public class FileContent implements Serializable{
+public class FileContent implements Serializable {
 	/**
 	 * 
 	 */
@@ -23,7 +23,8 @@ public class FileContent implements Serializable{
 	}
 
 	/**
-	 * @param fileName the fileName to set
+	 * @param fileName
+	 *            the fileName to set
 	 */
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
@@ -37,7 +38,8 @@ public class FileContent implements Serializable{
 	}
 
 	/**
-	 * @param content the content to set
+	 * @param content
+	 *            the content to set
 	 */
 	public void setContent(String content) {
 		this.content = content;

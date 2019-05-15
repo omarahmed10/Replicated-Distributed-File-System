@@ -49,4 +49,9 @@ public class ReplicaLoc implements Serializable {
 	public String toString() {
 		return this.host + " " + this.port;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.host.equals(((ReplicaLoc) obj).host) && this.port == ((ReplicaLoc) obj).port;
+	}
 }

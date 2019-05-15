@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fileSystem.SSh;
 import replica.ReplicaLoc;
 
 public class MasterServer extends MasterServerClientImpl {
@@ -58,14 +59,14 @@ public class MasterServer extends MasterServerClientImpl {
 		String path = System.getProperty("user.dir");
 		int numberOfReplicas = (int) prop.get("numberOfReplicas");
 		ReplicaLoc[] allReplicas = new ReplicaLoc[numberOfReplicas];
-
 		for (int i = 1; i < numberOfReplicas + 1; i++) {
 			String[] server = prop.get("R" + i).toString().split(":");
 
 			int port = Integer.parseInt(server[2]);
-			// SSh ssh = new SSh(server[0], server[1]);
-			// ssh.runCommand(" cd " + path + "/bin/replica; java ReplicaServer " + i + " "
-			// + server[1] + " " + server[2]);
+
+			SSh ssh = new SSh(server[0], server[1]);
+			ssh.runCommand(" cd " + path + "/bin; java replica.ReplicaServer " + i + " " + server[1] + " " + server[2]
+					+ " " + prop.get("serverIP") + " " + prop.get("port"));
 
 			allReplicas[i - 1] = new ReplicaLoc(server[1], port);
 		}
@@ -86,5 +87,12 @@ public class MasterServer extends MasterServerClientImpl {
 		Registry registry = LocateRegistry.getRegistry(prop.get("serverIP").toString(),
 				Integer.parseInt(prop.get("port").toString()));
 		registry.rebind("masterAPI", masterAPI);
+
+		Runtime.getRuntime().addShutdownHook(new Thread("app-shutdown-hook") {
+			@Override
+			public void run() {
+				System.out.println("bye");
+			}
+		});
 	}
 }

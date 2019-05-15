@@ -1,6 +1,5 @@
 package master;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -31,8 +30,7 @@ public class MasterServerClientImpl extends UnicastRemoteObject
 	private Random rnd;
 	private ReplicaLoc[] allReplicaLocation;
 
-	protected MasterServerClientImpl(ReplicaLoc[] allReplicaLocation,
-			int replicasNum) throws RemoteException {
+	protected MasterServerClientImpl(ReplicaLoc[] allReplicaLocation, int replicasNum) throws RemoteException {
 		super();
 
 		assert replicasNum <= allReplicaLocation.length;
@@ -44,8 +42,8 @@ public class MasterServerClientImpl extends UnicastRemoteObject
 	}
 
 	@Override
-	public ReadMsg read(String fileName)
-			throws FileNotFoundException, IOException, RemoteException {
+	public ReadMsg read(String fileName) throws FileNotFoundException, IOException, RemoteException {
+
 		if (!filesMap.containsKey(fileName)) {
 			throw new FileNotFoundException();
 		}
@@ -53,8 +51,7 @@ public class MasterServerClientImpl extends UnicastRemoteObject
 	}
 
 	@Override
-	public synchronized WriteMsg write(String fileName)
-			throws RemoteException, IOException {
+	public synchronized WriteMsg write(String fileName) throws RemoteException {
 
 		if (!filesMap.containsKey(fileName))
 			filesMap.put(fileName, getAvailReplica());
@@ -87,8 +84,7 @@ public class MasterServerClientImpl extends UnicastRemoteObject
 	}
 
 	@Override
-	public ReplicaLoc[] getReplicaServersLocs(String fileName)
-			throws RemoteException {
+	public ReplicaLoc[] getReplicaServersLocs(String fileName) throws RemoteException {
 		return filesMap.get(fileName);
 	}
 

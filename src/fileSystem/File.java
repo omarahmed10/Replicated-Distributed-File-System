@@ -1,6 +1,5 @@
 package fileSystem;
 
-
 public class File {
 	private final String fileName;
 

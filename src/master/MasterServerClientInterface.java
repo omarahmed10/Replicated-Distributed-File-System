@@ -18,8 +18,7 @@ public interface MasterServerClientInterface extends Remote {
 	 * @throws IOException
 	 * @throws RemoteException
 	 */
-	public ReadMsg read(String fileName) throws FileNotFoundException,
-			IOException, RemoteException;
+	public ReadMsg read(String fileName) throws FileNotFoundException, IOException, RemoteException;
 
 	/**
 	 * Start a new write transaction
@@ -29,6 +28,6 @@ public interface MasterServerClientInterface extends Remote {
 	 * @throws RemoteException
 	 * @throws IOException
 	 */
-	public WriteMsg write(String fileName) throws RemoteException, IOException;
+	public WriteMsg write(String fileName) throws RemoteException;
 
 }
