@@ -10,13 +10,15 @@ import java.nio.file.Paths;
 public class Transaction {
 	private final long ID;
 	private final String fileName;
+	private final String directory;
 	private BufferedWriter writer;
 	private int numOfMsgs;
 	private String hidden;
 
-	public Transaction(long ID, String fileName) {
+	public Transaction(long ID, String fileName, String directory) {
 		this.ID = ID;
 		this.fileName = fileName;
+		this.directory = directory;
 		numOfMsgs = 0;
 		if (!Files.exists(Paths.get(fileName)))
 			hidden = ".";
@@ -37,31 +39,34 @@ public class Transaction {
 			throw new IOException("Not same file of the transaction");
 		if (writer == null)
 			writer = new BufferedWriter(
-					new FileWriter(hidden + fileName, true));
+					new FileWriter(directory + "/" + hidden + fileName, true));
 		writer.append(data.getContent());
 		return ++numOfMsgs;
 	}
 
 	public FileContent read(String fileName) throws IOException {
-		return new FileContent(fileName,
-				new String(Files.readAllBytes(Paths.get(fileName))));
+		return new FileContent(fileName, new String(
+				Files.readAllBytes(Paths.get(directory + "/" + fileName))));
 	}
 
 	public boolean commit(long numOfMsgs) throws IOException {
-		if (this.numOfMsgs != numOfMsgs)
+		if (this.numOfMsgs != numOfMsgs) {
+			if (!hidden.isEmpty())
+				Files.delete(Paths.get(directory + "/" + hidden + fileName));
 			return false;
+		}
 
 		writer.close();
 
-		new File(fileName)
-				.renameTo(new File(fileName.substring(hidden.length())));
+		new File(directory + "/" + fileName).renameTo(new File(
+				directory + "/" + fileName.substring(hidden.length())));
 
 		return true;
 	}
 
 	public boolean abort() throws IOException {
 		if (!hidden.isEmpty())
-			Files.delete(Paths.get(hidden + fileName));
+			Files.delete(Paths.get(directory + "/" + hidden + fileName));
 		return true;
 	}
 }

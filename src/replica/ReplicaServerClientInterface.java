@@ -1,6 +1,7 @@
 package replica;
 
 import java.io.IOException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -21,7 +22,7 @@ public interface ReplicaServerClientInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public WriteMsg write(long txnID, long msgSeqNum, FileContent data)
-			throws RemoteException, IOException;
+			throws RemoteException, IOException, NotBoundException;
 
 	public FileContent read(long txnID, String fileName)
 			throws IOException, RemoteException;
@@ -36,7 +37,8 @@ public interface ReplicaServerClientInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public boolean commit(long txnID, long numOfMsgs)
-			throws MessageNotFoundException, RemoteException, IOException;
+			throws MessageNotFoundException, RemoteException, IOException,
+			NotBoundException;
 
 	/**
 	 * * @param txnID: the ID of the transaction to which this message relates
@@ -44,5 +46,6 @@ public interface ReplicaServerClientInterface extends Remote {
 	 * @return true for acknowledgment
 	 * @throws RemoteException
 	 */
-	public boolean abort(long txnID) throws RemoteException, IOException;
+	public boolean abort(long txnID)
+			throws RemoteException, IOException, NotBoundException;
 }

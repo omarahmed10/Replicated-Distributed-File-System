@@ -1,10 +1,12 @@
 package replica;
 
+import java.io.File;
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,21 +18,34 @@ import master.MasterPrimaryServersInterface;
 
 public class ReplicaServerImpl implements ReplicaServerClientInterface {
 	private ReplicaLoc replicaLoc;
-	// make it synchronized ?
+	private final String ID;
+	private String masterHost;
+	private int masterPort;
 	private Map<Long, Transaction> transactions;
+	private String directory;
 
-	public ReplicaServerImpl(ReplicaLoc replicaLoc) {
-		// we should start the server here
+	public ReplicaServerImpl(ReplicaLoc replicaLoc, String ID,
+			String masterHost, int masterPort) throws IOException {
 		this.replicaLoc = replicaLoc;
-		transactions = new HashMap<>();
+		this.ID = ID;
+		this.masterHost = masterHost;
+		this.masterPort = masterPort;
+
+		transactions = Collections.synchronizedMap(new HashMap<>());
+		directory = "replica" + this.ID;
+		new File(directory).mkdirs();
 	}
 
 	@Override
 	public WriteMsg write(long txnID, long msgSeqNum, FileContent data)
-			throws RemoteException, IOException {
+			throws RemoteException, IOException, NotBoundException {
 		if (!transactions.containsKey(txnID))
-			transactions.put(txnID, new Transaction(txnID, data.getFileName()));
+			transactions.put(txnID,
+					new Transaction(txnID, data.getFileName(), directory));
 		int numOfMsgs = transactions.get(txnID).write(msgSeqNum, data);
+
+		writeToReplicaServers(getReplicaServersLocs(data.getFileName()), txnID,
+				msgSeqNum, data);
 
 		// timestamp has no meaning here, instead numOfMsgs is used
 		// also we can return object other than WriteMsg
@@ -41,7 +56,8 @@ public class ReplicaServerImpl implements ReplicaServerClientInterface {
 	public FileContent read(long txnID, String fileName)
 			throws IOException, RemoteException {
 		if (!transactions.containsKey(txnID))
-			transactions.put(txnID, new Transaction(txnID, fileName));
+			transactions.put(txnID,
+					new Transaction(txnID, fileName, directory));
 
 		return transactions.get(txnID).read(fileName);
 	}
@@ -49,24 +65,33 @@ public class ReplicaServerImpl implements ReplicaServerClientInterface {
 	// don't know what's the rule of MessageNotFoundException
 	@Override
 	public boolean commit(long txnID, long numOfMsgs)
-			throws MessageNotFoundException, RemoteException, IOException {
+			throws MessageNotFoundException, RemoteException, IOException,
+			NotBoundException {
 		if (!transactions.containsKey(txnID))
 			return false;
 
-		return transactions.remove(txnID).commit(numOfMsgs);
+		return transactions.remove(txnID).commit(numOfMsgs)
+				&& commitReplicaServers(
+						getReplicaServersLocs(
+								transactions.get(txnID).getFileName()),
+						txnID, numOfMsgs);
 	}
 
 	@Override
-	public boolean abort(long txnID) throws RemoteException, IOException {
+	public boolean abort(long txnID)
+			throws RemoteException, IOException, NotBoundException {
 		if (!transactions.containsKey(txnID))
 			return false;
 
-		return transactions.remove(txnID).abort();
+		return transactions.remove(txnID).abort() && abortReplicaServers(
+				getReplicaServersLocs(transactions.get(txnID).getFileName()),
+				txnID);
 	}
 
-	public ReplicaLoc[] getReplicaServersLocs(String host, int port,
-			String fileName) throws RemoteException, NotBoundException {
-		Registry masterRegistry = LocateRegistry.getRegistry(host, port);
+	public ReplicaLoc[] getReplicaServersLocs(String fileName)
+			throws RemoteException, NotBoundException {
+		Registry masterRegistry = LocateRegistry.getRegistry(masterHost,
+				masterPort);
 		MasterPrimaryServersInterface masterStub = (MasterPrimaryServersInterface) masterRegistry
 				.lookup("masterAPI");
 		return masterStub.getReplicaServersLocs(fileName);
@@ -123,6 +148,10 @@ public class ReplicaServerImpl implements ReplicaServerClientInterface {
 
 	public ReplicaLoc getReplicaLoc() {
 		return replicaLoc;
+	}
+
+	public String getID() {
+		return ID;
 	}
 
 }
