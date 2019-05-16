@@ -26,7 +26,6 @@ public class Writer {
 	 *            : 2 is the port number of the master server <integer> <br>
 	 *            : 3 is the File name to be read. <br>
 	 *            : 4 is the content to be written in the file. : 4 is the number of
-	 *            write then read.
 	 * @throws NumberFormatException
 	 * @throws NotBoundException
 	 * @throws IOException
@@ -69,9 +68,8 @@ public class Writer {
 			while (iterations-- > 0) {
 				replicaStub.write(wMsg.getTransactionId(), msgSeqNum++, wFile);
 				Thread.sleep(1000);
-				// FileContent fileContent = replicaStub.read(wMsg.getTransactionId(),
-				// wFile.getFileName());
-				fileWriter.append(wFile.getContent() + "\n");
+				FileContent fileContent = replicaStub.read(wMsg.getTransactionId(), wFile.getFileName());
+				fileWriter.append(fileContent.getContent() + "\n");
 			}
 			Boolean commitDone = replicaStub.commit(wMsg.getTransactionId(), msgSeqNum - 1);
 			fileWriter.append("Committing is done = " + commitDone + "\n");

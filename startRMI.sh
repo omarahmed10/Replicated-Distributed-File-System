@@ -2,12 +2,12 @@
 cd bin
 rmic replica.ReplicaServerImpl master.MasterServerClientImpl
 
-rmiregistry 50000 &
-rmiregistry 50001 &
-rmiregistry 50002 &
-rmiregistry 50003 &
-rmiregistry 50004 &
-rmiregistry 50005 &
-rmiregistry 50006 &
-rmiregistry 50007 &
-rmiregistry 50008 &
+rmiregistry 40000 &
+rmiregistry 40001 &
+rmiregistry 40002 &
+rmiregistry 40003 &
+rmiregistry 40004 &
+rmiregistry 40005 &
+rmiregistry 40006 &
+rmiregistry 40007 &
+rmiregistry 40008 &
