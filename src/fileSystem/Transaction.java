@@ -1,4 +1,5 @@
-ackage fileSytem;
+package fileSystem;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
